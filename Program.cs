@@ -65,14 +65,16 @@ namespace ServerApp
                 {
                     WriteDetailLog(context);
                     HostString hostString = context.Request.HttpContext.Request.Host;
-                //Log.Information($"QueryString = {hostString}");
+                    //Log.Information($"QueryString = {hostString}");
 
-                // начинаем гадание на кофейной гуще - какое целое число содержит имя сайта?
-                string host = hostString.Host;
+                    // начинаем гадание на кофейной гуще - какое целое число содержит имя сайта?
+                    string host = hostString.Host;
+                    // for example:
+                    // string host = "code404.junecat.ru";
                     string[] domains = host.Split('.');
-                    if (domains.Length > 1 && domains[0].ToLower().IndexOf("code") != 0 || domains[1].ToLower().IndexOf("code") != 0)
+                    if (domains.Length > 1 && !( domains[0].ToLower().IndexOf("code") == 0 || domains[1].ToLower().IndexOf("code") == 0) )
                     {
-                        Log.Error($"Sorry, 'code' word not present in URL");
+                        Log.Error($"Sorry, 'code' word not present in begin of URL");
                         await context.Response.WriteAsync(sorryMsg);
                         return;
                     }
