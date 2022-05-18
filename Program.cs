@@ -68,7 +68,7 @@ namespace ServerApp
                 // начинаем гадание на кофейной гуще - какое целое число содержит имя сайта?
                 string host = hostString.Host;
                 string[] domains = host.Split('.');
-                if ( domains[0].ToLower().IndexOf("code")!=0)
+                if (domains.Length>1 && domains[0].ToLower().IndexOf("code")!=0 || domains[1].ToLower().IndexOf("code") != 0)
                 {
                     Log.Error($"Sorry, 'code' word not present in URL");
                     await context.Response.WriteAsync(sorryMsg);
@@ -81,7 +81,19 @@ namespace ServerApp
                 for (int i = 500; i <= 511; ++i)
                     availableHttpCodes.Add(i);
 
-                string domainDigits = domains[0].ToLower().Replace("code", "");
+                string domainDigits = "";
+                if (domains[0].ToLower()=="www" && domains.Length>1 && domains[1].ToLower().IndexOf("code")==0 )
+                    domainDigits = domains[1].ToLower().Replace("code", "");
+                else
+                    if (domains[0].ToLower().IndexOf("code") == 0)
+                        domainDigits = domains[0].ToLower().Replace("code", "");
+
+                if (string.IsNullOrEmpty(domainDigits))
+                {
+                    Log.Error($"Sorry, 'domainDigits' in URL={host} is empty");
+                    await context.Response.WriteAsync(sorryMsg);
+                    return;
+                }
 
                 if (int.TryParse(domainDigits, out httpcode))
                 {
@@ -92,7 +104,7 @@ namespace ServerApp
                         response.Headers.ContentLanguage = "ru-RU";
                         response.Headers.ContentType = "text/plain; charset=utf-8";
                         response.Headers.Append("hello-from", "junecat.ru");    // добавление кастомного заголовка
-                        response.StatusCode = 500;
+                        response.StatusCode = httpcode;
                         await response.WriteAsync(String.Empty);
                         return;
                     }
