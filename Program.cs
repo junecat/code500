@@ -63,9 +63,10 @@ namespace ServerApp
 
                 app.Run(async (context) =>
                 {
+                    Log.Information(new string('*', 60));
                     WriteDetailLog(context);
                     HostString hostString = context.Request.HttpContext.Request.Host;
-                    //Log.Information($"QueryString = {hostString}");
+                    Log.Information($"QueryString = {hostString}");
 
                     // начинаем гадание на кофейной гуще - какое целое число содержит имя сайта?
                     string host = hostString.Host;
@@ -109,7 +110,7 @@ namespace ServerApp
                             response.Headers.ContentLanguage = "ru-RU";
                             response.Headers.ContentType = "text/plain; charset=utf-8";
                             response.Headers.Append("hello-from", "junecat.ru");    // добавление кастомного заголовка
-                        response.StatusCode = httpcode;
+                            response.StatusCode = httpcode;
                             await response.WriteAsync(String.Empty);
                             return;
                         }
@@ -134,7 +135,6 @@ namespace ServerApp
 
         private void WriteDetailLog(HttpContext context)
         {
-            Log.Information($"Path =  {context.Request.Path}");
             StringBuilder sb = new StringBuilder();
             foreach (var h in context.Request.Headers)
                 sb.Append($"{h.Key} = {h.Value}{Environment.NewLine}");
