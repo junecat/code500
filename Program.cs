@@ -58,67 +58,76 @@ namespace ServerApp
             }
 
             const string sorryMsg = "Sorry something went wrong...";
-
-            app.Run(async (context) =>
+            try
             {
-                WriteDetailLog(context);
-                HostString hostString = context.Request.HttpContext.Request.Host;
+
+                app.Run(async (context) =>
+                {
+                    WriteDetailLog(context);
+                    HostString hostString = context.Request.HttpContext.Request.Host;
                 //Log.Information($"QueryString = {hostString}");
-                
+
                 // начинаем гадание на кофейной гуще - какое целое число содержит имя сайта?
                 string host = hostString.Host;
-                string[] domains = host.Split('.');
-                if (domains.Length>1 && domains[0].ToLower().IndexOf("code")!=0 || domains[1].ToLower().IndexOf("code") != 0)
-                {
-                    Log.Error($"Sorry, 'code' word not present in URL");
-                    await context.Response.WriteAsync(sorryMsg);
-                    return;
-                }
-
-                int httpcode = 0;
-                
-                List<int> availableHttpCodes = new List<int> { 401, 404, 301, 302, 410, };
-                for (int i = 500; i <= 511; ++i)
-                    availableHttpCodes.Add(i);
-
-                string domainDigits = "";
-                if (domains[0].ToLower()=="www" && domains.Length>1 && domains[1].ToLower().IndexOf("code")==0 )
-                    domainDigits = domains[1].ToLower().Replace("code", "");
-                else
-                    if (domains[0].ToLower().IndexOf("code") == 0)
-                        domainDigits = domains[0].ToLower().Replace("code", "");
-
-                if (string.IsNullOrEmpty(domainDigits))
-                {
-                    Log.Error($"Sorry, 'domainDigits' in URL={host} is empty");
-                    await context.Response.WriteAsync(sorryMsg);
-                    return;
-                }
-
-                if (int.TryParse(domainDigits, out httpcode))
-                {
-                    Log.Information($"requested code: {httpcode}");
-
-                    if (availableHttpCodes.Contains(httpcode)) {
-                        var response = context.Response;
-                        response.Headers.ContentLanguage = "ru-RU";
-                        response.Headers.ContentType = "text/plain; charset=utf-8";
-                        response.Headers.Append("hello-from", "junecat.ru");    // добавление кастомного заголовка
-                        response.StatusCode = httpcode;
-                        await response.WriteAsync(String.Empty);
-                        return;
-                    }
-                    else
+                    string[] domains = host.Split('.');
+                    if (domains.Length > 1 && domains[0].ToLower().IndexOf("code") != 0 || domains[1].ToLower().IndexOf("code") != 0)
                     {
-                        Log.Error($"Sorry, code {httpcode} not present in available for reuest");
+                        Log.Error($"Sorry, 'code' word not present in URL");
                         await context.Response.WriteAsync(sorryMsg);
                         return;
                     }
-                }
 
-                Log.Error(sorryMsg);
-                await context.Response.WriteAsync(sorryMsg);
-            });
+                    int httpcode = 0;
+
+                    List<int> availableHttpCodes = new List<int> { 401, 404, 301, 302, 410, };
+                    for (int i = 500; i <= 511; ++i)
+                        availableHttpCodes.Add(i);
+
+                    string domainDigits = "";
+                    if (domains[0].ToLower() == "www" && domains.Length > 1 && domains[1].ToLower().IndexOf("code") == 0)
+                        domainDigits = domains[1].ToLower().Replace("code", "");
+                    else
+                        if (domains[0].ToLower().IndexOf("code") == 0)
+                        domainDigits = domains[0].ToLower().Replace("code", "");
+
+                    if (string.IsNullOrEmpty(domainDigits))
+                    {
+                        Log.Error($"Sorry, 'domainDigits' in URL={host} is empty");
+                        await context.Response.WriteAsync(sorryMsg);
+                        return;
+                    }
+
+                    if (int.TryParse(domainDigits, out httpcode))
+                    {
+                        Log.Information($"requested code: {httpcode}");
+
+                        if (availableHttpCodes.Contains(httpcode))
+                        {
+                            var response = context.Response;
+                            response.Headers.ContentLanguage = "ru-RU";
+                            response.Headers.ContentType = "text/plain; charset=utf-8";
+                            response.Headers.Append("hello-from", "junecat.ru");    // добавление кастомного заголовка
+                        response.StatusCode = httpcode;
+                            await response.WriteAsync(String.Empty);
+                            return;
+                        }
+                        else
+                        {
+                            Log.Error($"Sorry, code {httpcode} not present in available for reuest");
+                            await context.Response.WriteAsync(sorryMsg);
+                            return;
+                        }
+                    }
+
+                    Log.Error(sorryMsg);
+                    await context.Response.WriteAsync(sorryMsg);
+                });
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message);
+            }
         }
 
         private void WriteDetailLog(HttpContext context)
