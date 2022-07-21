@@ -94,7 +94,7 @@ docker build -t code500build-image1 --build-arg ssh_prv_key="$(cat ~/.ssh/ro_key
 
 Можно нам - хлопать в ладоши, а контейнеру - умирать.
 
-В результате в папке publish-output (папка лежит рядом с Dockerfile) лежат бинарники, которые нужно поместить в папочку bin/Release/net5.0/publish/, чтобы команда из докерфайла запска приложения
+В результате в папке publish-output (папка лежит рядом с Dockerfile) лежат бинарники, которые нужно поместить в папочку bin/Release/net5.0/publish/, чтобы команда из докерфайла запуска приложения
 
 ```
 COPY bin/Release/net5.0/publish/ App/
