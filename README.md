@@ -84,7 +84,7 @@ CMD cp -r /App/code500/bin/Release/net6.0/* /App/publish-output
 
 ключи для ридонли доступа называются ro_key и ro_key.pub
 
-Сама команда на билд выглядит так:
+Сама команда на **билд** контейнера для билда выглядит так:
 
 ```
 docker build -t code500build-image1 --build-arg ssh_prv_key="$(cat ~/.ssh/ro_key)" --build-arg ssh_pub_key="$(cat ~/.ssh/ro_key.pub)" -f Dockerfile .
@@ -92,7 +92,15 @@ docker build -t code500build-image1 --build-arg ssh_prv_key="$(cat ~/.ssh/ro_key
 
 Ну, а потом в докерфайле всё просто: забираем код, строим приложение с ключиком release, потом результаты копируем в папку на хосте. 
 
-Можно нам - хлопать в ладоши, а контейнеру - умирать.
+Для того, чтобы билд прозошел, нужно это контейнер еще и запустить, это делается так:
+
+```
+docker run -it --name code500build-cont  -v /home/konst/ContainerBuildCode500/publish-output:/App/publish-output -d code500build-image1
+```
+
+Вот теперь сделано все - построены бинарники, которые нужно засунуть в "рабочий" контейнер
+
+Можно нам - хлопать в ладоши, а билд-контейнеру - умирать.
 
 В результате в папке publish-output (папка лежит рядом с Dockerfile) лежат бинарники, которые нужно поместить в папочку bin/Release/net5.0/publish/, чтобы команда из докерфайла запуска приложения
 
